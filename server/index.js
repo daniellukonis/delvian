@@ -15,8 +15,13 @@ app.get('/', (req, res) => {
 
 io.on('connection', (socket) => {
     console.log('a user connected')
+
     socket.on('disconnect', () => {
         console.log('a user disconnected')
+    })
+
+    socket.on('dataToServer', (data) => {
+        io.emit('dataToClients', data)
     })
 })
 

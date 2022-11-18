@@ -1,9 +1,10 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
+import Canvas from './components/Canvas'
+const container = document.getElementById('app')
 
-import App from './app'
 
-ReactDOM.render(
-    <App />,
-    document.getElementById('app')
-  )
+
+const root = createRoot(container)
+root.render(<Canvas />)
+
