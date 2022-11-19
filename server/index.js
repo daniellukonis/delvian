@@ -7,6 +7,8 @@ const app = express()
 const server = http.createServer(app)
 const io = new Server(server)
 
+const players = {}
+
 app.use(express.static(path.join(__dirname, '../public')))
 
 app.get('/', (req, res) => {
@@ -14,14 +16,19 @@ app.get('/', (req, res) => {
 })
 
 io.on('connection', (socket) => {
-    console.log('a user connected')
+    socket.emit('socketID', socket.id)
+    players[socket.id] = []
+    console.log('a user connected', players)
 
     socket.on('disconnect', () => {
+        delete players[socket.id]
         console.log('a user disconnected')
     })
 
     socket.on('dataToServer', (data) => {
-        io.emit('dataToClients', data)
+        players[socket.id] = data
+        console.log(players)
+        io.emit('dataToClients', players)
     })
 })
 
