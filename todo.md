@@ -1,7 +1,7 @@
 /*  SERVER
-**  serve html, css
+<!-- **  serve html, css -->
 **  api routes
-**  socket io
+<!-- **  socket io -->
 **  track of ship, bullets, health
 **
 **
@@ -21,6 +21,11 @@
 **  emit on hit
 
 entity
+
+max speed
+
+
+
 
 mass
 current velocity

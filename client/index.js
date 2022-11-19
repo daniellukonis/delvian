@@ -1,10 +1,24 @@
-import React from 'react'
-import { createRoot } from 'react-dom/client'
-import Canvas from './components/Canvas'
-const container = document.getElementById('app')
 
+import { canvas, context, container, resizeCanvas,
+     Entity, engine, startEngine
+    } from './game'
 
+resizeCanvas(canvas, container)
+const e1 = new Entity(canvas, context)
 
-const root = createRoot(container)
-root.render(<Canvas />)
+window.addEventListener('resize', e => {
+    resizeCanvas(canvas, container)
+    e1.setPosition();
+})
+
+canvas.addEventListener('mousemove', e => {
+    const target = e.target
+    const rect = target.getBoundingClientRect()
+    const x = Math.floor(e.clientX - rect.left)
+    const y = Math.floor(e.clientY - rect.top)
+    e1.setAngle(x, y)
+
+})
+
+startEngine(e1)
 
