@@ -15,6 +15,7 @@ class Entity {
         this.velocityY = startData.velocityY || 0
 
         this.radius = 10
+        this.player = false
     }
 
     checkBounce () {
@@ -46,6 +47,10 @@ class Entity {
         this.velocityY = data[3]
     }
 
+    setPlayer () {
+        this.player = true
+    }
+
     move () {
         this.positionX += this.velocityX
         this.positionY += this.velocityY
@@ -53,8 +58,8 @@ class Entity {
 
     render ({ context } = this) {
         context.save()
-        context.strokeStyle = '#888888'
-        context.lineWidth = 2
+        context.strokeStyle = this.player ? '#0000AA' : '#888888'
+        context.lineWidth = 1
         context.beginPath()
         context.arc(this.positionX, this.positionY, this.radius, 0, Math.PI * 2)
         context. stroke()

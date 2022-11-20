@@ -4,10 +4,11 @@ import { io } from 'socket.io-client'
 import { canvas, context, clearCanvas } from './canvas'
 
 
-
+/*
+** Game data state
+*/
 const gameData = {
     playerEntities: [],
-    playerData: {},
     socket: ''
 }
 

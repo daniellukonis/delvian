@@ -38,3 +38,10 @@ target turn angle
 current turn angle
 angular velocity
 */
+
+
+send all player data
+sort out own player
+set to blue
+rest to default
+object keys to array

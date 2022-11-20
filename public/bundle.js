@@ -113,6 +113,7 @@ var Entity = /*#__PURE__*/function () {
     this.velocityX = startData.velocityX || 0;
     this.velocityY = startData.velocityY || 0;
     this.radius = 10;
+    this.player = false;
   }
   _createClass(Entity, [{
     key: "checkBounce",
@@ -144,6 +145,11 @@ var Entity = /*#__PURE__*/function () {
       this.velocityY = data[3];
     }
   }, {
+    key: "setPlayer",
+    value: function setPlayer() {
+      this.player = true;
+    }
+  }, {
     key: "move",
     value: function move() {
       this.positionX += this.velocityX;
@@ -155,8 +161,8 @@ var Entity = /*#__PURE__*/function () {
       var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this,
         context = _ref.context;
       context.save();
-      context.strokeStyle = '#888888';
-      context.lineWidth = 2;
+      context.strokeStyle = this.player ? '#0000AA' : '#888888';
+      context.lineWidth = 1;
       context.beginPath();
       context.arc(this.positionX, this.positionY, this.radius, 0, Math.PI * 2);
       context.stroke();
@@ -4301,9 +4307,12 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+/*
+** Game data state
+*/
 var gameData = {
   playerEntities: [],
-  playerData: {},
   socket: ''
 };
 
