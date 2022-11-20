@@ -15,9 +15,14 @@ class Entity {
         this.velocityY = startData.velocityY || 0
 
         this.radius = 10
-        this.player = false
+        this.player = startData.player || false
+
+        this.health = 255
     }
 
+    /*
+    ** Reverses velocity upon hitting canvas edges
+    */
     checkBounce () {
         if (this.positionX > this.canvas.width && this.velocityX > 0) {
             this.velocityX *= -1
@@ -36,9 +41,13 @@ class Entity {
             }
     }
 
+
+
     getData () {
         return [this.positionX, this.positionY, this.velocityX, this.velocityY] 
     }
+
+
 
     setData (data) {
         this.positionX = data[0]
@@ -47,18 +56,24 @@ class Entity {
         this.velocityY = data[3]
     }
 
+
+
     setPlayer () {
         this.player = true
     }
+
+
 
     move () {
         this.positionX += this.velocityX
         this.positionY += this.velocityY
     }
 
+
+
     render ({ context } = this) {
         context.save()
-        context.strokeStyle = this.player ? '#0000AA' : '#888888'
+        context.strokeStyle = this.player ? '#AA00AA' : '#888888'
         context.lineWidth = 1
         context.beginPath()
         context.arc(this.positionX, this.positionY, this.radius, 0, Math.PI * 2)
@@ -66,11 +81,15 @@ class Entity {
         context.restore()
     }
 
+
+
     animate () {
         this.checkBounce()
         this.move()
         this.render()
     }
 }
+
+
 
 export default Entity

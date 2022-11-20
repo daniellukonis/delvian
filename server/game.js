@@ -37,7 +37,7 @@ class Game {
 
     /*  returns array of player positions and velocities  */
     getPlayers () {
-        return Object.values(this.players)
+        return this.players
     }
 }
 

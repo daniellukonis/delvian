@@ -1,5 +1,6 @@
-import Entity from './entity'
+
 import Engine from './engine'
+import Game from './game'
 import { io } from 'socket.io-client'
 import { canvas, context, clearCanvas } from './canvas'
 
@@ -7,10 +8,7 @@ import { canvas, context, clearCanvas } from './canvas'
 /*
 ** Game data state
 */
-const gameData = {
-    playerEntities: [],
-    socket: ''
-}
+const game = new Game()
 
 
 
@@ -19,12 +17,15 @@ const gameData = {
 */
 const socket = io();
 socket.on('new player', (playerData) => {
-    // gameData.playerData = playerData
-    gameData.socket = socket.id
-    gameData.playerEntities = (playerData.map(e => {
-        return new Entity(canvas, context, e)
-    }))
-    console.log(gameData)
+    game.setSocketID(socket.id)
+    game.setPlayers(playerData)
+    game.setPlayer()
+    game.parsePlayers()
+})
+
+socket.on('request client update', () => {
+    
+    socket.emit()
 })
 
 
@@ -35,6 +36,20 @@ socket.on('new player', (playerData) => {
 function randomInt (min, max) {
     return Math.floor(Math.random() * (max - min)) + min
 }
+
+
+
+/*
+** Active browser tab check
+*/
+document.addEventListener('visibilitychange', function (event) {
+    if (document.hidden) {
+        console.log('not visible');
+    } else {
+        console.log('is visible');
+        //request game update
+    }
+});
 
 
 
@@ -51,5 +66,5 @@ function renderAll (playerEntities) {
 */
 const engine = new Engine()
 engine.addToEngine(clearCanvas)
-engine.addToEngine(() => renderAll(gameData.playerEntities))
+engine.addToEngine(() => renderAll(game.playerEntities))
 engine.loop()

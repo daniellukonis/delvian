@@ -53,19 +53,27 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 var Engine = /*#__PURE__*/function () {
   function Engine() {
     _classCallCheck(this, Engine);
-    this.fps = 30;
+    this.FPS = 10;
     this.now;
     this.then = Date.now();
-    this.interval = 1000 / this.fps;
+    this.interval = 1000 / this.FPS;
     this.delta;
     this.payload = [];
     this.loop = this.loop.bind(this);
   }
+
+  /*
+  ** Add function to run each loop
+  */
   _createClass(Engine, [{
     key: "addToEngine",
     value: function addToEngine(func) {
       this.payload.push(func);
     }
+
+    /*
+    ** Loop runs at this.FPS frames per second
+    */
   }, {
     key: "loop",
     value: function loop() {
@@ -74,7 +82,10 @@ var Engine = /*#__PURE__*/function () {
       this.delta = this.now - this.then;
       if (this.delta > this.interval) {
         this.then = this.now - this.delta % this.interval;
-        // ... Code for Drawing the Frame ...
+
+        /*
+        ** Each function in payload runs each frame
+        */
         this.payload.forEach(function (p) {
           p();
         });
@@ -113,8 +124,13 @@ var Entity = /*#__PURE__*/function () {
     this.velocityX = startData.velocityX || 0;
     this.velocityY = startData.velocityY || 0;
     this.radius = 10;
-    this.player = false;
+    this.player = startData.player || false;
+    this.health = 255;
   }
+
+  /*
+  ** Reverses velocity upon hitting canvas edges
+  */
   _createClass(Entity, [{
     key: "checkBounce",
     value: function checkBounce() {
@@ -161,7 +177,7 @@ var Entity = /*#__PURE__*/function () {
       var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this,
         context = _ref.context;
       context.save();
-      context.strokeStyle = this.player ? '#0000AA' : '#888888';
+      context.strokeStyle = this.player ? '#AA00AA' : '#888888';
       context.lineWidth = 1;
       context.beginPath();
       context.arc(this.positionX, this.positionY, this.radius, 0, Math.PI * 2);
@@ -179,6 +195,78 @@ var Entity = /*#__PURE__*/function () {
   return Entity;
 }();
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Entity);
+
+/***/ }),
+
+/***/ "./client/game.js":
+/*!************************!*\
+  !*** ./client/game.js ***!
+  \************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _entity__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./entity */ "./client/entity.js");
+/* harmony import */ var _canvas__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./canvas */ "./client/canvas.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+
+
+/*
+**  Game client class
+*/
+var Game = /*#__PURE__*/function () {
+  function Game() {
+    _classCallCheck(this, Game);
+    this.players = {};
+    this.playerEntities = [];
+    this.socketID = '';
+    this.board = {
+      width: 600,
+      height: 600
+    };
+  }
+  _createClass(Game, [{
+    key: "setPlayer",
+    value: function setPlayer() {
+      this.players[this.socketID].player = true;
+    }
+  }, {
+    key: "setPlayers",
+    value: function setPlayers(players) {
+      this.players = players;
+    }
+  }, {
+    key: "getPlayers",
+    value: function getPlayers() {
+      return this.players;
+    }
+  }, {
+    key: "parsePlayers",
+    value: function parsePlayers() {
+      var players = Object.values(this.players);
+      this.playerEntities = players.map(function (e) {
+        return new _entity__WEBPACK_IMPORTED_MODULE_0__["default"](_canvas__WEBPACK_IMPORTED_MODULE_1__.canvas, _canvas__WEBPACK_IMPORTED_MODULE_1__.context, e);
+      });
+    }
+  }, {
+    key: "getPlayerEntities",
+    value: function getPlayerEntities() {
+      return this.playerEntities;
+    }
+  }, {
+    key: "setSocketID",
+    value: function setSocketID(id) {
+      this.socketID = id;
+    }
+  }]);
+  return Game;
+}();
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Game);
 
 /***/ }),
 
@@ -4299,8 +4387,8 @@ var __webpack_exports__ = {};
   !*** ./client/index.js ***!
   \*************************/
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _entity__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./entity */ "./client/entity.js");
-/* harmony import */ var _engine__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./engine */ "./client/engine.js");
+/* harmony import */ var _engine__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./engine */ "./client/engine.js");
+/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./game */ "./client/game.js");
 /* harmony import */ var socket_io_client__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! socket.io-client */ "./node_modules/socket.io-client/build/esm/index.js");
 /* harmony import */ var _canvas__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./canvas */ "./client/canvas.js");
 
@@ -4311,22 +4399,20 @@ __webpack_require__.r(__webpack_exports__);
 /*
 ** Game data state
 */
-var gameData = {
-  playerEntities: [],
-  socket: ''
-};
+var game = new _game__WEBPACK_IMPORTED_MODULE_1__["default"]();
 
 /*
 ** Socket io connection
 */
 var socket = (0,socket_io_client__WEBPACK_IMPORTED_MODULE_2__.io)();
 socket.on('new player', function (playerData) {
-  // gameData.playerData = playerData
-  gameData.socket = socket.id;
-  gameData.playerEntities = playerData.map(function (e) {
-    return new _entity__WEBPACK_IMPORTED_MODULE_0__["default"](_canvas__WEBPACK_IMPORTED_MODULE_3__.canvas, _canvas__WEBPACK_IMPORTED_MODULE_3__.context, e);
-  });
-  console.log(gameData);
+  game.setSocketID(socket.id);
+  game.setPlayers(playerData);
+  game.setPlayer();
+  game.parsePlayers();
+});
+socket.on('request client update', function () {
+  socket.emit();
 });
 
 /*
@@ -4335,6 +4421,19 @@ socket.on('new player', function (playerData) {
 function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
+
+/*
+** Active browser tab check
+*/
+document.addEventListener('visibilitychange', function (event) {
+  if (document.hidden) {
+    console.log('not visible');
+  } else {
+    console.log('is visible');
+    //request game update
+  }
+});
+
 function renderAll(playerEntities) {
   playerEntities.forEach(function (entity) {
     entity.animate();
@@ -4344,10 +4443,10 @@ function renderAll(playerEntities) {
 /*
 ** Game engine
 */
-var engine = new _engine__WEBPACK_IMPORTED_MODULE_1__["default"]();
+var engine = new _engine__WEBPACK_IMPORTED_MODULE_0__["default"]();
 engine.addToEngine(_canvas__WEBPACK_IMPORTED_MODULE_3__.clearCanvas);
 engine.addToEngine(function () {
-  return renderAll(gameData.playerEntities);
+  return renderAll(game.playerEntities);
 });
 engine.loop();
 })();
