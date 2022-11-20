@@ -3,7 +3,7 @@
 */
 class Engine {
     constructor () {
-        this.FPS = 10
+        this.FPS = 30
         this.now
         this.then = Date.now()
         this.interval = 1000 / this.FPS
@@ -11,6 +11,8 @@ class Engine {
 
         this.payload = []
         this.loop = this.loop.bind(this)
+
+        this.active = false
     }
 
 
@@ -24,11 +26,24 @@ class Engine {
 
 
 
+    start() {
+      this.active = true
+      this.loop()
+    }
+
+
+
+    stop() {
+      this.active = false
+    }
+
+
+    
 		/*
 		** Loop runs at this.FPS frames per second
 		*/
     loop() {
-        window.requestAnimationFrame(this.loop)
+        this.active && window.requestAnimationFrame(this.loop)
 
         this.now = Date.now()
         this.delta = this.now - this.then

@@ -53,13 +53,14 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 var Engine = /*#__PURE__*/function () {
   function Engine() {
     _classCallCheck(this, Engine);
-    this.FPS = 10;
+    this.FPS = 30;
     this.now;
     this.then = Date.now();
     this.interval = 1000 / this.FPS;
     this.delta;
     this.payload = [];
     this.loop = this.loop.bind(this);
+    this.active = false;
   }
 
   /*
@@ -70,6 +71,17 @@ var Engine = /*#__PURE__*/function () {
     value: function addToEngine(func) {
       this.payload.push(func);
     }
+  }, {
+    key: "start",
+    value: function start() {
+      this.active = true;
+      this.loop();
+    }
+  }, {
+    key: "stop",
+    value: function stop() {
+      this.active = false;
+    }
 
     /*
     ** Loop runs at this.FPS frames per second
@@ -77,7 +89,7 @@ var Engine = /*#__PURE__*/function () {
   }, {
     key: "loop",
     value: function loop() {
-      window.requestAnimationFrame(this.loop);
+      this.active && window.requestAnimationFrame(this.loop);
       this.now = Date.now();
       this.delta = this.now - this.then;
       if (this.delta > this.interval) {
@@ -148,19 +160,6 @@ var Entity = /*#__PURE__*/function () {
       }
     }
   }, {
-    key: "getData",
-    value: function getData() {
-      return [this.positionX, this.positionY, this.velocityX, this.velocityY];
-    }
-  }, {
-    key: "setData",
-    value: function setData(data) {
-      this.positionX = data[0];
-      this.positionY = data[1];
-      this.velocityX = data[2];
-      this.velocityY = data[3];
-    }
-  }, {
     key: "setPlayer",
     value: function setPlayer() {
       this.player = true;
@@ -177,10 +176,12 @@ var Entity = /*#__PURE__*/function () {
       var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this,
         context = _ref.context;
       context.save();
-      context.strokeStyle = this.player ? '#AA00AA' : '#888888';
-      context.lineWidth = 1;
+      context.fillStyle = this.player ? '#AA00AA' : '#888888';
+      context.strokeStyle = "rgb(255,255,255,".concat(this.health, ")");
+      context.lineWidth = 4;
       context.beginPath();
       context.arc(this.positionX, this.positionY, this.radius, 0, Math.PI * 2);
+      context.fill();
       context.stroke();
       context.restore();
     }
@@ -225,10 +226,6 @@ var Game = /*#__PURE__*/function () {
     this.players = {};
     this.playerEntities = [];
     this.socketID = '';
-    this.board = {
-      width: 600,
-      height: 600
-    };
   }
   _createClass(Game, [{
     key: "setPlayer",
@@ -239,11 +236,6 @@ var Game = /*#__PURE__*/function () {
     key: "setPlayers",
     value: function setPlayers(players) {
       this.players = players;
-    }
-  }, {
-    key: "getPlayers",
-    value: function getPlayers() {
-      return this.players;
     }
   }, {
     key: "parsePlayers",
@@ -4402,53 +4394,50 @@ __webpack_require__.r(__webpack_exports__);
 var game = new _game__WEBPACK_IMPORTED_MODULE_1__["default"]();
 
 /*
-** Socket io connection
+** Game engine
 */
-var socket = (0,socket_io_client__WEBPACK_IMPORTED_MODULE_2__.io)();
-socket.on('new player', function (playerData) {
-  game.setSocketID(socket.id);
-  game.setPlayers(playerData);
-  game.setPlayer();
-  game.parsePlayers();
+var engine = new _engine__WEBPACK_IMPORTED_MODULE_0__["default"]();
+engine.addToEngine(_canvas__WEBPACK_IMPORTED_MODULE_3__.clearCanvas);
+engine.addToEngine(function () {
+  return animateAll(game.playerEntities);
 });
-socket.on('request client update', function () {
-  socket.emit();
-});
-
-/*
-** General helper functions
-*/
-function randomInt(min, max) {
-  return Math.floor(Math.random() * (max - min)) + min;
-}
-
-/*
-** Active browser tab check
-*/
-document.addEventListener('visibilitychange', function (event) {
-  if (document.hidden) {
-    console.log('not visible');
-  } else {
-    console.log('is visible');
-    //request game update
-  }
-});
-
 function renderAll(playerEntities) {
+  playerEntities.forEach(function (entity) {
+    entity.render();
+  });
+}
+function animateAll(playerEntities) {
   playerEntities.forEach(function (entity) {
     entity.animate();
   });
 }
 
 /*
-** Game engine
+** Socket io connection
 */
-var engine = new _engine__WEBPACK_IMPORTED_MODULE_0__["default"]();
-engine.addToEngine(_canvas__WEBPACK_IMPORTED_MODULE_3__.clearCanvas);
-engine.addToEngine(function () {
-  return renderAll(game.playerEntities);
+var socket = (0,socket_io_client__WEBPACK_IMPORTED_MODULE_2__.io)();
+
+/*
+** Update game state from server
+*/
+socket.on('all players', function (playerData) {
+  game.setSocketID(socket.id);
+  game.setPlayers(playerData);
+  game.setPlayer();
+  game.parsePlayers();
+  (0,_canvas__WEBPACK_IMPORTED_MODULE_3__.clearCanvas)();
+  renderAll(game.playerEntities);
+  engine.stop();
 });
-engine.loop();
+socket.on('start game', function () {
+  engine.start();
+});
+socket.on('stop game', function () {
+  engine.stop();
+});
+_canvas__WEBPACK_IMPORTED_MODULE_3__.canvas.addEventListener('click', function () {
+  socket.emit('go');
+});
 })();
 
 /******/ })()

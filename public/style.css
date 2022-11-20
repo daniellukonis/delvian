@@ -6,22 +6,29 @@
 }
 
 body{
-    background-color: #333;
+    background-color: #111;
     width: 100vw;
     height: 100vh;
 
+    font-family: monospace;
+    color: #a5219a;
+
     display: flex;
+    gap: 1rem;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
 }
 
 #canvas{
-    background-color: #111;
+    background-color: #11111175;
+    border: 2px solid #260892;
     /* width: 400px;
     height: 400px; */
 }
 
 #canvas-container {
+    background-image: url('back.jpg');
     background-color: #444;
     width: 98vw;
     height: 80vh;

@@ -35,25 +35,43 @@ const game = new Game()
 /*
 **  Io events
 */
+
+//  Add player to game on connect
 io.on('connection', (socket) => {
     console.log('a user connected', socket.id)
-
-    //	Create new player in game
     game.createPlayer(socket.id)
-
-		//	Broadcast new player data
 		const playerData = game.getPlayers();
-		io.emit('new player', playerData)
+
+		io.emit('all players', playerData)
+
     
+    
+
+//	Remove player from game on disconnect
     socket.on('disconnect', () => {
-				//	Remove player from game on disconnect
-        game.deletePlayer(socket.id)
-				
-				const playerData = game.getPlayers();
-				io.emit('new player', playerData)
-        console.log('a user disconnected', socket.id)
+      console.log('a user disconnected', socket.id)
+      game.deletePlayer(socket.id)
+      const playerData = game.getPlayers();
+
+      io.emit('all players', playerData)
+        
+    })
+
+
+    socket.on('go', () => {
+      startGame()
     })
 })
+
+
+
+
+function startGame () {
+  io.emit('start game')
+}
+
+
+
 
 
 

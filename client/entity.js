@@ -20,6 +20,8 @@ class Entity {
         this.health = 255
     }
 
+
+
     /*
     ** Reverses velocity upon hitting canvas edges
     */
@@ -43,21 +45,6 @@ class Entity {
 
 
 
-    getData () {
-        return [this.positionX, this.positionY, this.velocityX, this.velocityY] 
-    }
-
-
-
-    setData (data) {
-        this.positionX = data[0]
-        this.positionY = data[1]
-        this.velocityX = data[2]
-        this.velocityY = data[3]
-    }
-
-
-
     setPlayer () {
         this.player = true
     }
@@ -73,11 +60,13 @@ class Entity {
 
     render ({ context } = this) {
         context.save()
-        context.strokeStyle = this.player ? '#AA00AA' : '#888888'
-        context.lineWidth = 1
+        context.fillStyle = this.player ? '#AA00AA' : '#888888'
+        context.strokeStyle = `rgb(255,255,255,${this.health})`
+        context.lineWidth = 4
         context.beginPath()
         context.arc(this.positionX, this.positionY, this.radius, 0, Math.PI * 2)
-        context. stroke()
+        context.fill()
+        context.stroke()
         context.restore()
     }
 

@@ -21,8 +21,8 @@ class Game {
     createPlayer (playerID) {
         const positionX = this.randomInt(0, this.board.width)
         const positionY = this.randomInt(0, this.board.height)
-        const velocityX = this.randomInt(0, 4)
-        const velocityY = this.randomInt(0, 4)
+        const velocityX = this.randomInt(1, 4)
+        const velocityY = this.randomInt(1, 4)
         this.players[playerID] = { positionX, positionY, velocityX, velocityY }
     }
 

@@ -13,58 +13,69 @@ const game = new Game()
 
 
 /*
-** Socket io connection
+** Game engine
 */
-const socket = io();
-socket.on('new player', (playerData) => {
-    game.setSocketID(socket.id)
-    game.setPlayers(playerData)
-    game.setPlayer()
-    game.parsePlayers()
-})
-
-socket.on('request client update', () => {
-    
-    socket.emit()
-})
-
-
-
-/*
-** General helper functions
-*/
-function randomInt (min, max) {
-    return Math.floor(Math.random() * (max - min)) + min
-}
-
-
-
-/*
-** Active browser tab check
-*/
-document.addEventListener('visibilitychange', function (event) {
-    if (document.hidden) {
-        console.log('not visible');
-    } else {
-        console.log('is visible');
-        //request game update
-    }
-});
-
+const engine = new Engine()
+engine.addToEngine(clearCanvas)
+engine.addToEngine(() => animateAll(game.playerEntities))
 
 
 function renderAll (playerEntities) {
-    playerEntities.forEach(entity => {
-        entity.animate()
-    });
+	playerEntities.forEach(entity => {
+		entity.render()
+});
+}
+
+
+function animateAll (playerEntities) {
+	playerEntities.forEach(entity => {
+			entity.animate()
+	});
 } 
 
 
 
 /*
-** Game engine
+** Socket io connection
 */
-const engine = new Engine()
-engine.addToEngine(clearCanvas)
-engine.addToEngine(() => renderAll(game.playerEntities))
-engine.loop()
+const socket = io()
+
+
+
+/*
+** Update game state from server
+*/
+socket.on('all players', (playerData) => {
+    game.setSocketID(socket.id)
+    game.setPlayers(playerData)
+    game.setPlayer()
+    game.parsePlayers()
+		clearCanvas()
+		renderAll(game.playerEntities)
+
+		engine.stop()
+		
+})
+
+
+
+socket.on('start game', () => {
+	engine.start()
+})
+
+
+
+socket.on('stop game', () => {
+	engine.stop()
+})
+
+
+
+canvas.addEventListener('click', () => {
+	socket.emit('go')
+})
+
+
+
+
+
