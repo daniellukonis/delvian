@@ -2,6 +2,180 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "./client/canvas.js":
+/*!**************************!*\
+  !*** ./client/canvas.js ***!
+  \**************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "canvas": () => (/* binding */ canvas),
+/* harmony export */   "clearCanvas": () => (/* binding */ clearCanvas),
+/* harmony export */   "context": () => (/* binding */ context)
+/* harmony export */ });
+/*
+** Setup canvas
+*/
+var canvas = document.querySelector('canvas');
+var context = canvas.getContext('2d');
+var WIDTH = 600;
+var HEIGHT = 600;
+canvas.width = WIDTH;
+canvas.height = HEIGHT;
+
+/*
+** Canvas helper functions
+*/
+function clearCanvas() {
+  context.clearRect(0, 0, WIDTH, HEIGHT);
+}
+
+
+/***/ }),
+
+/***/ "./client/engine.js":
+/*!**************************!*\
+  !*** ./client/engine.js ***!
+  \**************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+/*
+** Render engine
+*/
+var Engine = /*#__PURE__*/function () {
+  function Engine() {
+    _classCallCheck(this, Engine);
+    this.fps = 30;
+    this.now;
+    this.then = Date.now();
+    this.interval = 1000 / this.fps;
+    this.delta;
+    this.payload = [];
+    this.loop = this.loop.bind(this);
+  }
+  _createClass(Engine, [{
+    key: "addToEngine",
+    value: function addToEngine(func) {
+      this.payload.push(func);
+    }
+  }, {
+    key: "loop",
+    value: function loop() {
+      window.requestAnimationFrame(this.loop);
+      this.now = Date.now();
+      this.delta = this.now - this.then;
+      if (this.delta > this.interval) {
+        this.then = this.now - this.delta % this.interval;
+        // ... Code for Drawing the Frame ...
+        this.payload.forEach(function (p) {
+          p();
+        });
+      }
+    }
+  }]);
+  return Engine;
+}();
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Engine);
+
+/***/ }),
+
+/***/ "./client/entity.js":
+/*!**************************!*\
+  !*** ./client/entity.js ***!
+  \**************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+/*
+** Entity base class
+*/
+var Entity = /*#__PURE__*/function () {
+  function Entity(canvas, context, startData) {
+    _classCallCheck(this, Entity);
+    this.canvas = canvas;
+    this.context = context;
+    this.positionX = startData.positionX || 0;
+    this.positionY = startData.positionY || 0;
+    this.velocityX = startData.velocityX || 0;
+    this.velocityY = startData.velocityY || 0;
+    this.radius = 10;
+  }
+  _createClass(Entity, [{
+    key: "checkBounce",
+    value: function checkBounce() {
+      if (this.positionX > this.canvas.width && this.velocityX > 0) {
+        this.velocityX *= -1;
+      }
+      if (this.positionX < 0 && this.velocityX < 0) {
+        this.velocityX *= -1;
+      }
+      if (this.positionY > this.canvas.height && this.velocityY > 0) {
+        this.velocityY *= -1;
+      }
+      if (this.positionY < 0 && this.velocityY < 0) {
+        this.velocityY *= -1;
+      }
+    }
+  }, {
+    key: "getData",
+    value: function getData() {
+      return [this.positionX, this.positionY, this.velocityX, this.velocityY];
+    }
+  }, {
+    key: "setData",
+    value: function setData(data) {
+      this.positionX = data[0];
+      this.positionY = data[1];
+      this.velocityX = data[2];
+      this.velocityY = data[3];
+    }
+  }, {
+    key: "move",
+    value: function move() {
+      this.positionX += this.velocityX;
+      this.positionY += this.velocityY;
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this,
+        context = _ref.context;
+      context.save();
+      context.strokeStyle = '#888888';
+      context.lineWidth = 2;
+      context.beginPath();
+      context.arc(this.positionX, this.positionY, this.radius, 0, Math.PI * 2);
+      context.stroke();
+      context.restore();
+    }
+  }, {
+    key: "animate",
+    value: function animate() {
+      this.checkBounce();
+      this.move();
+      this.render();
+    }
+  }]);
+  return Entity;
+}();
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Entity);
+
+/***/ }),
+
 /***/ "./node_modules/@socket.io/component-emitter/index.mjs":
 /*!*************************************************************!*\
   !*** ./node_modules/@socket.io/component-emitter/index.mjs ***!
@@ -4119,37 +4293,32 @@ var __webpack_exports__ = {};
   !*** ./client/index.js ***!
   \*************************/
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var socket_io_client__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! socket.io-client */ "./node_modules/socket.io-client/build/esm/index.js");
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+/* harmony import */ var _entity__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./entity */ "./client/entity.js");
+/* harmony import */ var _engine__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./engine */ "./client/engine.js");
+/* harmony import */ var socket_io_client__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! socket.io-client */ "./node_modules/socket.io-client/build/esm/index.js");
+/* harmony import */ var _canvas__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./canvas */ "./client/canvas.js");
+
+
+
+
+var gameData = {
+  playerEntities: [],
+  playerData: {},
+  socket: ''
+};
+
 /*
 ** Socket io connection
 */
-
-var socket = (0,socket_io_client__WEBPACK_IMPORTED_MODULE_0__.io)();
-socket.on('socketID', function () {
-  console.log(socket.id);
+var socket = (0,socket_io_client__WEBPACK_IMPORTED_MODULE_2__.io)();
+socket.on('new player', function (playerData) {
+  // gameData.playerData = playerData
+  gameData.socket = socket.id;
+  gameData.playerEntities = playerData.map(function (e) {
+    return new _entity__WEBPACK_IMPORTED_MODULE_0__["default"](_canvas__WEBPACK_IMPORTED_MODULE_3__.canvas, _canvas__WEBPACK_IMPORTED_MODULE_3__.context, e);
+  });
+  console.log(gameData);
 });
-//create entity
-//send entity data
-
-/*
-** Setup canvas
-*/
-var canvas = document.querySelector('canvas');
-var context = canvas.getContext('2d');
-var WIDTH = 600;
-var HEIGHT = 600;
-canvas.width = WIDTH;
-canvas.height = HEIGHT;
-
-/*
-** Canvas helper functions
-*/
-function clearCanvas() {
-  context.clearRect(0, 0, WIDTH, HEIGHT);
-}
 
 /*
 ** General helper functions
@@ -4157,122 +4326,21 @@ function clearCanvas() {
 function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
-
-/*
-** Entity base class
-*/
-var Entity = /*#__PURE__*/function () {
-  function Entity(canvas, context, socket) {
-    _classCallCheck(this, Entity);
-    this.canvas = canvas;
-    this.context = context;
-    this.socket = socket;
-    this.positionX = Math.floor(Math.random() * this.canvas.width);
-    this.positionY = Math.floor(Math.random() * this.canvas.height);
-    this.velocityX = 1;
-    this.velocityY = 0;
-    this.radius = 10;
-  }
-  _createClass(Entity, [{
-    key: "checkBounce",
-    value: function checkBounce() {
-      if (this.positionX > this.canvas.width && this.velocityX > 0) {
-        this.velocityX *= -1;
-        this.dataToServer();
-      }
-      if (this.positionX < 0 && this.velocityX < 0) {
-        this.velocityX *= -1;
-        this.dataToServer();
-      }
-    }
-  }, {
-    key: "getData",
-    value: function getData() {
-      return [this.positionX, this.positionY, this.velocityX, this.velocityY];
-    }
-  }, {
-    key: "setData",
-    value: function setData(data) {
-      this.positionX = data[0];
-      this.positionY = data[1];
-      this.velocityX = data[2];
-      this.velocityY = data[3];
-    }
-  }, {
-    key: "dataToServer",
-    value: function dataToServer() {
-      this.socket.emit('dataToServer', this.getData());
-    }
-  }, {
-    key: "move",
-    value: function move() {
-      this.positionX += this.velocityX;
-      this.positionY += this.velocityY;
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this,
-        context = _ref.context;
-      context.save();
-      context.strokeStyle = '#888888';
-      context.lineWidth = 2;
-      context.beginPath();
-      context.arc(this.positionX, this.positionY, this.radius, 0, Math.PI * 2);
-      context.stroke();
-      context.restore();
-    }
-  }, {
-    key: "animate",
-    value: function animate() {
-      this.checkBounce();
-      this.move();
-      this.render();
-    }
-  }]);
-  return Entity;
-}();
-var e1 = new Entity(canvas, context, socket);
-socket.on('dataToClients', function (data) {
-  return console.log(data);
-});
-
-/*
-** Render engine
-*/
-var fps = 10;
-var now;
-var then = Date.now();
-var interval = 1000 / fps;
-var delta;
-function engine() {
-  requestAnimationFrame(engine);
-  now = Date.now();
-  delta = now - then;
-  if (delta > interval) {
-    // update time stuffs
-
-    // Just `then = now` is not enough.
-    // Lets say we set fps at 10 which means
-    // each frame must take 100ms
-    // Now frame executes in 16ms (60fps) so
-    // the loop iterates 7 times (16*7 = 112ms) until
-    // delta > interval === true
-    // Eventually this lowers down the FPS as
-    // 112*10 = 1120ms (NOT 1000ms).
-    // So we have to get rid of that extra 12ms
-    // by subtracting delta (112) % interval (100).
-    // Hope that makes sense.
-
-    then = now - delta % interval;
-
-    // ... Code for Drawing the Frame ...
-    // dataToServer(e1.emitCoord())
-    clearCanvas();
-    e1.animate();
-  }
+function renderAll(playerEntities) {
+  playerEntities.forEach(function (entity) {
+    entity.animate();
+  });
 }
-engine();
+
+/*
+** Game engine
+*/
+var engine = new _engine__WEBPACK_IMPORTED_MODULE_1__["default"]();
+engine.addToEngine(_canvas__WEBPACK_IMPORTED_MODULE_3__.clearCanvas);
+engine.addToEngine(function () {
+  return renderAll(gameData.playerEntities);
+});
+engine.loop();
 })();
 
 /******/ })()

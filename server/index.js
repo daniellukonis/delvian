@@ -1,37 +1,65 @@
+const { app, server } = require('./express')
+const io = require('./socket')
+const Game = require('./game')
 const express = require('express')
-const { Server } = require('socket.io')
-const http = require('http')
 const path = require('path')
 
-const app = express()
-const server = http.createServer(app)
-const io = new Server(server)
+const PORT = 8080
+const port = process.env.PORT || PORT
 
-const players = {}
 
+
+/*
+**  Serve static files
+*/
 app.use(express.static(path.join(__dirname, '../public')))
 
+
+
+/*
+**  Serve home route
+*/
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/index.html'))
 })
 
+
+
+/*
+**  Create new game
+*/
+const game = new Game()
+
+
+
+/*
+**  Io events
+*/
 io.on('connection', (socket) => {
-    socket.emit('socketID', socket.id)
-    players[socket.id] = []
-    console.log('a user connected', players)
+    console.log('a user connected', socket.id)
 
+    //	Create new player in game
+    game.createPlayer(socket.id)
+
+		//	Broadcast new player data
+		const playerData = game.getPlayers();
+		io.emit('new player', playerData)
+    
     socket.on('disconnect', () => {
-        delete players[socket.id]
-        console.log('a user disconnected')
-    })
-
-    socket.on('dataToServer', (data) => {
-        players[socket.id] = data
-        console.log(players)
-        io.emit('dataToClients', players)
+				//	Remove player from game on disconnect
+        game.deletePlayer(socket.id)
+				
+				const playerData = game.getPlayers();
+				io.emit('new player', playerData)
+        console.log('a user disconnected', socket.id)
     })
 })
 
-server.listen(8080, () => {
-    console.log('server started', 8080)
+
+
+/*
+** Start server
+*/
+server.listen(port, () => {
+    console.log('server started', port)
 })
